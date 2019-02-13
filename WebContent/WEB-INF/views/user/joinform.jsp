@@ -27,8 +27,11 @@ $(function(){
 		}
 		
 		//2-2. 이메일 중복체크 유무
-		
-		
+		if($("#img-checkemail").is(":visible") == false){
+			alert("이메일 중복 체크를 해야 합니다.");
+			return false;
+		}
+	
 		//3. 비밀번호 확인
 		if($("input[type='password']").val() == ""){
 			alert("비밀번호는 필수 입력 항목입니다.");
@@ -42,7 +45,12 @@ $(function(){
 			return false;
 		}
 		
-		return false;
+		return true;
+	});
+	
+	$("#email").change(function(){
+		$("#btn-checkemail").show();
+		$("#img-checkemail").hide();
 	});
 	
 	$("#btn-checkemail").click(function(){
@@ -52,7 +60,7 @@ $(function(){
 		}
 		
 		$.ajax({
-			url: "/mysite2/api/user",
+			url: "${pageContext.servletContext.contextPath }/api/user",
 			type: "post",
 			dataType: "json",
 			data: "a=ajax-checkemail&email=" + email,
