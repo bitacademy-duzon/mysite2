@@ -21,7 +21,7 @@ public class AjaxCheckEmailAction implements Action {
 		String email = request.getParameter("email");
 		
 		UserDao dao = new UserDao();
-		UserVo vo = null; //dao.checkEmail(email);
+		UserVo vo = dao.get(email);
 		
 		boolean bExist = vo != null;
 		Map<String, Object> map = new HashMap<String, Object>();
