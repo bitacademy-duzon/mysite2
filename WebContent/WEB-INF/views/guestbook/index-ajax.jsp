@@ -158,10 +158,8 @@ $(function(){
 		fetchList();
 	});
 	
-	
-	
 	// 최초 리스트 가져오기
-	// fetchList();
+	fetchList();
 });
 </script>
 </head>
