@@ -149,6 +149,65 @@ public class GuestbookDao {
 		return list;
 	}
 
+	public List<GuestbookVo> getList(int page) {
+		List<GuestbookVo> list = new ArrayList<GuestbookVo>();
+
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+
+		try {
+			conn = getConnection();
+
+			String sql =
+				"   select no," + 
+				"          name," + 
+				"	       message," + 
+				"     	   date_format(reg_date, '%Y-%m-%d %h:%i:%s')" + 
+				"     from guestbook" + 
+				" order by reg_date desc" +
+				"     limit ?, 5";
+			
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setInt(1, (page-1) * 5);
+			rs = pstmt.executeQuery();
+
+			while (rs.next()) {
+				Long no = rs.getLong(1);
+				String name = rs.getString(2);
+				String message = rs.getString(3);
+				String regDate = rs.getString(4);
+
+				GuestbookVo vo = new GuestbookVo();
+				vo.setNo(no);
+				vo.setName(name);
+				vo.setMessage( message );
+				vo.setRegDate( regDate );
+
+				list.add(vo);
+			}
+		} catch (SQLException e) {
+			System.out.println("error :" + e);
+		} finally {
+			// 자원 정리
+			try {
+				if (rs != null) {
+					rs.close();
+				}
+				if (pstmt != null) {
+					pstmt.close();
+				}
+				if (conn != null) {
+					conn.close();
+				}
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+
+		return list;
+	}
+	
 	private Connection getConnection() throws SQLException {
 		Connection conn = null;
 		try {

@@ -12,19 +12,37 @@
 <script type="text/javascript" src="${pageContext.request.contextPath }/assets/js/jquery/jquery-1.9.0.js"></script>
 <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 <script>
+var page = 0;
+
 $(function(){
+	
+	$("#btn-next").click(function(){
+		++page;
+		$.ajax({
+			url: "/mysite2/api/guestbook?a=ajax-list&p=" + page,
+			type: "get",
+			dataType: "json",
+			data:"",
+			success: function(response){
+				console.log(response);
+			},
+			error: function(xhr, status, e){
+				console.error(status + ":" + e);
+			}
+		});
+	});
+	/*
 	$(window).scroll( function(){
 		var $window = $(this);
 		var scrollTop = $window.scrollTop();
 		var windowHeight = $window.height();
 		var documentHeight = $(document).height();
 		
-		//console.log(scrollTop + ":" + windowHeight + ":" + documentHeight);
 		if( scrollTop + windowHeight + 10 > documentHeight ){
 			console.log("fetch ajax starting....");
 		}
-	
 	});
+	*/
 });
 </script>
 </head>
@@ -71,9 +89,8 @@ $(function(){
 						<strong></strong>
 						<a href='' data-no=''>삭제</a> 
 					</li>
-					
-									
 				</ul>
+				<button id="btn-next">다음</button>
 			</div>
 			<div id="dialog-delete-form" title="메세지 삭제" style="display:none">
   				<p class="validateTips normal">작성시 입력했던 비밀번호를 입력하세요.</p>
