@@ -12,6 +12,10 @@ import java.util.List;
 import com.douzone.mysite.vo.GuestbookVo;
 
 public class GuestbookDao {
+	public GuestbookVo get(long no) {
+		return null;
+	}
+	
 	public int delete( GuestbookVo vo ) {
 		int count = 0;
 		Connection conn = null;
@@ -70,6 +74,13 @@ public class GuestbookDao {
 
 			count = pstmt.executeUpdate();
 
+			/* 
+			 * 방금 들어간 row에 Primary Key 받아오는 방법
+			 * 
+			 * "select last_insert_id()" 날린다.
+			 * 
+			 */
+			
 		} catch (SQLException e) {
 			System.out.println("error :" + e);
 		} finally {

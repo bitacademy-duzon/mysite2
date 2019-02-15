@@ -13,23 +13,65 @@
 <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 <script>
 var page = 0;
+var isEnd = false;
+
+var render = function(vo, mode){
+	// 현업에 가면 이렇게 안한다. -> js template library 를 사용
+	// ex) ejs, underscore, mustache
+	var htmls = 
+		"<li data-no='" + vo.no + "'>" +
+		"<strong>" + vo.name + "</strong>" +
+		"<p>" + vo.message.replace(/\n/g, "<br>") + "</p>" +
+		"<strong></strong>" +
+		"<a href='' data-no='" + vo.no +"'>삭제</a>" + 
+		"</li>";
+	
+	if( mode == true ) {
+		$("#list-guestbook").prepend(htmls);		
+	} else {
+		$("#list-guestbook").append(htmls);		
+	}	
+}
+
+var fetchList = function(){
+	if(isEnd == true){
+		return;
+	}
+	
+	++page;
+	$.ajax({
+		url: "/mysite2/api/guestbook?a=ajax-list&p=" + page,
+		type: "get",
+		dataType: "json",
+		data:"",
+		success: function(response){
+			if(response.result == "fail"){
+				console.warn(response.data);
+				return;
+			}
+			
+			console.log(response.data);
+			
+			// 페이지 끝을 검출
+			if(response.data.length < 5){
+				isEnd = true;
+				$("#btn-next").prop("disabled", true);
+			}
+			
+			// rendering
+			$.each(response.data, function(index, vo){
+				render(vo, false);
+			});
+		},
+		error: function(xhr, status, e){
+			console.error(status + ":" + e);
+		}
+	});
+}
 
 $(function(){
-	
 	$("#btn-next").click(function(){
-		++page;
-		$.ajax({
-			url: "/mysite2/api/guestbook?a=ajax-list&p=" + page,
-			type: "get",
-			dataType: "json",
-			data:"",
-			success: function(response){
-				console.log(response);
-			},
-			error: function(xhr, status, e){
-				console.error(status + ":" + e);
-			}
-		});
+		fetchList();
 	});
 	/*
 	$(window).scroll( function(){
@@ -43,6 +85,9 @@ $(function(){
 		}
 	});
 	*/
+	
+	// 최초 리스트 가져오기
+	fetchList();
 });
 </script>
 </head>
@@ -58,38 +103,7 @@ $(function(){
 					<textarea id="tx-content" placeholder="내용을 입력해 주세요."></textarea>
 					<input type="submit" value="보내기" />
 				</form>
-				<ul id="list-guestbook">
-
-					<li data-no=''>
-						<strong>지나가다가</strong>
-						<p>
-							별루입니다.<br>
-							비번:1234 -,.-
-						</p>
-						<strong></strong>
-						<a href='' data-no=''>삭제</a> 
-					</li>
-					
-					<li data-no=''>
-						<strong>둘리</strong>
-						<p>
-							안녕하세요<br>
-							홈페이지가 개 굿 입니다.
-						</p>
-						<strong></strong>
-						<a href='' data-no=''>삭제</a> 
-					</li>
-
-					<li data-no=''>
-						<strong>주인</strong>
-						<p>
-							아작스 방명록 입니다.<br>
-							테스트~
-						</p>
-						<strong></strong>
-						<a href='' data-no=''>삭제</a> 
-					</li>
-				</ul>
+				<ul id="list-guestbook"></ul>
 				<button id="btn-next">다음</button>
 			</div>
 			<div id="dialog-delete-form" title="메세지 삭제" style="display:none">
