@@ -9,11 +9,45 @@
 <meta http-equiv="content-type" content="text/html; charset=utf-8">
 <link rel="stylesheet" href="${pageContext.request.contextPath }/assets/css/guestbook-ajax.css" rel="stylesheet" type="text/css">
 <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<style type="text/css">
+#dialog-delete-form p {
+	padding: 10px;
+	font-weight: bold;
+	font-size:1.0em;
+}
+
+#dialog-delete-form input[type="password"] {
+	padding: 5px;
+	outline: none;
+	width: 180px;
+	border:1px solid #888
+}
+</style>
 <script type="text/javascript" src="${pageContext.request.contextPath }/assets/js/jquery/jquery-1.9.0.js"></script>
 <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 <script>
+// jqeury plug-in
+(function($){
+	$.fn.hello = function(){
+		console.log( $(this).attr("id") + "----> hello" );
+	}
+})(jQuery);
+
 var page = 0;
 var isEnd = false;
+
+var messageBox = function(title, message){
+	$("#dialog-message").attr("title", title);
+	$("#dialog-message p").text(message);
+	$("#dialog-message").dialog({
+		modal: true,
+		buttons: {
+			"확인": function(){
+				$(this).dialog("close");
+			}
+		}
+	});
+}
 
 var render = function(vo, mode){
 	// 현업에 가면 이렇게 안한다. -> js template library 를 사용
@@ -30,7 +64,7 @@ var render = function(vo, mode){
 		$("#list-guestbook").prepend(htmls);		
 	} else {
 		$("#list-guestbook").append(htmls);		
-	}	
+	}
 }
 
 var fetchList = function(){
@@ -50,8 +84,6 @@ var fetchList = function(){
 				return;
 			}
 			
-			console.log(response.data);
-			
 			// 페이지 끝을 검출
 			if(response.data.length < 5){
 				isEnd = true;
@@ -70,10 +102,46 @@ var fetchList = function(){
 }
 
 $(function(){
-	$("#btn-next").click(function(){
-		fetchList();
+	var dialogDelete = $("#dialog-delete-form").dialog({
+		autoOpen: false,
+		modal: true,
+		buttons: {
+			"삭제": function(){
+				console.log("ajax 삭제 작업");
+				//$.ajax({})
+			},
+			"취소": function(){
+				dialogDelete.dialog("close");
+			}
+		},
+		close: function(){
+			console.log("close 시 뒤처리...");
+		}
 	});
-	/*
+	
+	// live event
+	$(document).on("click", "#list-guestbook li a", function(event){
+		event.preventDefault();
+		console.log("clicked:" + $(this).data("no"));
+		dialogDelete.dialog("open");
+	} );
+
+	// 메세지 등록 폼 submit 이벤트 처리
+	$("#add-form").submit(function(event){
+		// submit의 기본동작(post)
+		// 막아야 한다.
+		event.preventDefault();
+		
+		//validate form data
+		var name = $("#input-name").val();
+		if(name == ""){
+			messageBox("글 남기기", "이름은 필수 입력 항목입니다.");
+			return;
+		}
+		
+	});
+	
+	// 스크롤 이벤트
 	$(window).scroll( function(){
 		var $window = $(this);
 		var scrollTop = $window.scrollTop();
@@ -81,13 +149,19 @@ $(function(){
 		var documentHeight = $(document).height();
 		
 		if( scrollTop + windowHeight + 10 > documentHeight ){
-			console.log("fetch ajax starting....");
+			fetchList();
 		}
 	});
-	*/
+
+	$("#btn-next").click(function(){
+		$(this).hello();
+		fetchList();
+	});
+	
+	
 	
 	// 최초 리스트 가져오기
-	fetchList();
+	// fetchList();
 });
 </script>
 </head>
@@ -103,8 +177,8 @@ $(function(){
 					<textarea id="tx-content" placeholder="내용을 입력해 주세요."></textarea>
 					<input type="submit" value="보내기" />
 				</form>
-				<ul id="list-guestbook"></ul>
 				<button id="btn-next">다음</button>
+				<ul id="list-guestbook"></ul>
 			</div>
 			<div id="dialog-delete-form" title="메세지 삭제" style="display:none">
   				<p class="validateTips normal">작성시 입력했던 비밀번호를 입력하세요.</p>
@@ -116,7 +190,7 @@ $(function(){
   				</form>
 			</div>
 			<div id="dialog-message" title="" style="display:none">
-  				<p></p>
+  				<p style="padding:30px 0"></p>
 			</div>						
 		</div>
 		<c:import url="/WEB-INF/views/includes/navigation.jsp">
